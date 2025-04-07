@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Stickman Greeting</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            padding-top: 50px;
+            overflow: hidden;
+        }
+
+        #text {
+            font-size: 24px;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+
+        #revealButton {
+            display: none;
+            margin-top: 30px;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .bouncingImage {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            z-index: 10;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="text"></div>
+    <button id="revealButton">Call Friends For Help</button>
+
+    <script>
+        const textElement = document.getElementById('text');
+        const revealButton = document.getElementById('revealButton');
+
+        const messages = ['Hello!', "Hope it's a good day in Australia", 'Please wait a moment...', 'You are being hacked with happiness :)'];
+        const ransomMessage = 'Pls pay $200 to Adit to have a good day 🔫';
+        const finalMessage = 'Noooo, have a good day :)';
+
+        let index = 0;
+        let replacementCounter = 0;
+        let replacedIndexes = new Set();
+
+        const evilImage = "images/evil.png";
+
+        const imageSources = [
+            "images/img1.png",
+            "images/img2.png",
+            "images/img3.png",
+            "images/img4.png",
+            "images/img5.png",
+            "images/img6.png",
+            "images/img7.png"
+        ];
+
+        let maxImages = imageSources.length;
+
+        const bouncingImages = [];
+
+        function showMessage() {
+            if (index < messages.length) {
+                textElement.textContent = messages[index];
+                textElement.style.opacity = 1;
+                setTimeout(() => {
+                    textElement.style.opacity = 0;
+                    index++;
+                    setTimeout(showMessage, 1000);
+                }, 2000);
+            } else {
+                textElement.textContent = ransomMessage;
+                textElement.style.opacity = 1;
+                revealButton.style.display = 'inline-block';
+                for (let i = 0; i < maxImages; i++) {
+                    startBouncingImage(evilImage);
+                }
+            }
+        }
+
+        function startBouncingImage(src, replaceIndex = null) {
+            const img = document.createElement('img');
+            img.src = src;
+            img.className = "bouncingImage";
+            document.body.appendChild(img);
+
+            let x = Math.random() * (window.innerWidth - 100);
+            let y = Math.random() * (window.innerHeight - 100);
+            let dx = 1 + Math.random();
+            let dy = 1 + Math.random();
+
+            function animate() {
+                if (x + dx > window.innerWidth - 100 || x + dx < 0) dx = -dx;
+                if (y + dy > window.innerHeight - 100 || y + dy < 0) dy = -dy;
+                x += dx;
+                y += dy;
+                img.style.left = x + 'px';
+                img.style.top = y + 'px';
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+
+            if (replaceIndex !== null) {
+                document.body.removeChild(bouncingImages[replaceIndex]);
+                bouncingImages[replaceIndex] = img;
+                replacedIndexes.add(replaceIndex);
+
+                if (replacedIndexes.size === maxImages) {
+                    textElement.textContent = finalMessage;
+                    revealButton.style.display = 'none';
+                }
+            } else {
+                bouncingImages.push(img);
+            }
+        }
+
+        revealButton.addEventListener('click', () => {
+            if (replacementCounter < maxImages) {
+                const replaceIndex = replacementCounter;
+                replacementCounter++;
+                const newImgSrc = imageSources[replaceIndex];
+                startBouncingImage(newImgSrc, replaceIndex);
+            }
+        });
+
+        showMessage();
+    </script>
+</body>
+
+</html>
